@@ -1,0 +1,5 @@
+{
+  "name": "System Sync",
+  "description": "An application that allows users to check if their system is compatible with a game or another application. It provides a detailed compatibility report and simulates game performance with a video playback adjusted to the estimated FPS.",
+  "requestFramePermissions": []
+}
