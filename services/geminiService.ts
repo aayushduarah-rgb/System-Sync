@@ -26,7 +26,7 @@ const gameDetailsSchema = {
     properties: {
         id: { type: Type.STRING, description: "A unique slug-style ID for the game, like 'the-witcher-3-wild-hunt'." },
         name: { type: Type.STRING, description: "The official name of the game." },
-        posterUrl: { type: Type.STRING, description: "A publicly accessible URL for a high-quality, landscape-orientation promotional image or in-game screenshot. Do NOT use vertical box art." },
+        posterUrl: { type: Type.STRING, description: "A publicly accessible URL for the official video game cover art or promotional poster. It must match the correct video game, avoiding movies or fan art. The image should feature authentic visuals like characters, scenes, or logos from the game. If a suitable, high-quality image that meets these criteria cannot be found, return the exact string 'NO_IMAGE' instead of a URL." },
         minReqs: { type: Type.OBJECT, properties: { cpu: { type: Type.STRING }, gpu: { type: Type.STRING }, ram: { type: Type.STRING }, os: { type: Type.STRING }, }, required: ['cpu', 'gpu', 'ram', 'os'] },
         recReqs: { type: Type.OBJECT, properties: { cpu: { type: Type.STRING }, gpu: { type: Type.STRING }, ram: { type: Type.STRING }, os: { type: Type.STRING }, }, required: ['cpu', 'gpu', 'ram', 'os'] }
     },
@@ -69,18 +69,18 @@ export async function getCompatibilityReport(game: Game, userSpecs: SystemSpecs)
 
 export async function searchForGame(gameName: string): Promise<Game[] | null> {
     const prompt = `
-        Find the complete PC system requirements for the game: "${gameName}".
-        1.  If the name is ambiguous (e.g., "Call of Duty", "FIFA"), provide a list of the top 3 most popular and relevant games matching the query.
+        Find the complete PC system requirements for the video game titled: "{game_name}".
+        1.  If the name is ambiguous (e.g., "Call of Duty"), provide a list of the top 3 most popular and relevant games.
         2.  If the name is a clear match, provide a list with just that single game.
-        3.  For each game, you must find both Minimum and Recommended requirements (CPU, GPU, RAM, OS).
-        4.  For each game, find a publicly accessible URL for its high-quality, landscape-orientation promotional image or an in-game screenshot. Do NOT use vertical box art.
+        3.  For each game, find both Minimum and Recommended PC requirements (CPU, GPU, RAM, OS).
+        4.  For each game, retrieve a publicly accessible URL for its official video game cover art or promotional poster. It must match the correct video game, not movies, fan art, or unrelated objects. The image must only include authentic visuals from the game—characters, scenes, or logos from the correct title. If you cannot find an exact cover that meets these criteria, return the string 'NO_IMAGE' for the posterUrl field.
         5.  Return the result as a single JSON object. If you cannot find the game, return a JSON object with an empty "games" array.
     `;
 
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
-            contents: prompt,
+            contents: prompt.replace('{game_name}', gameName),
             config: { responseMimeType: "application/json", responseSchema: gameSearchSchema },
         });
         const gameData = JSON.parse(response.text.trim());

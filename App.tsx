@@ -9,16 +9,15 @@ import { PaymentPage } from './components/PaymentPage';
 import { Loader } from './components/Loader';
 import { AboutPage } from './components/AboutPage';
 import { SearchResultsModal } from './components/SearchResultsModal';
-import { DownloadPromptModal } from './components/DownloadPromptModal';
-import { InstallButton } from './components/InstallButton';
-import { Footer } from './components/Footer';
+import { DownloadPage } from './components/DownloadPage';
+import { Footer } from './Footer';
 import type { Game, SystemSpecs, CompatibilityReport } from './types';
 import { getCompatibilityReport, searchForGame } from './services/geminiService';
 import { GAMES as initialGames } from './constants';
 
 const FREE_CHECKS_LIMIT = 5;
 
-type View = 'checker' | 'login' | 'subscription' | 'about' | 'payment';
+type View = 'checker' | 'login' | 'subscription' | 'about' | 'payment' | 'download';
 
 function App() {
   const [games, setGames] = useState<Game[]>(initialGames);
@@ -33,7 +32,6 @@ function App() {
   const [view, setView] = useState<View>('checker');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<Game[]>([]);
-  const [isDownloadPromptVisible, setIsDownloadPromptVisible] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -62,7 +60,6 @@ function App() {
   }, []);
 
   const handleInstallClick = () => {
-    setIsDownloadPromptVisible(false);
     if (!installPrompt) return;
     installPrompt.prompt();
     installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
@@ -160,6 +157,7 @@ function App() {
       case 'subscription': return <SubscriptionPage onProceedToPayment={handleProceedToPayment} onBack={() => setView('checker')} />;
       case 'payment': return <PaymentPage onPaymentSuccess={handlePaymentSuccess} onBack={() => setView('subscription')} />;
       case 'about': return <AboutPage onBack={() => setView('checker')} />;
+      case 'download': return <DownloadPage onBack={() => setView('checker')} onInstall={handleInstallClick} isInstallable={!!installPrompt} />;
       case 'checker':
       default:
         return (
@@ -168,6 +166,7 @@ function App() {
               freeChecksLeft={freeChecksLeft} 
               onShowAbout={() => setView('about')}
               onShowSubscription={() => setView('subscription')}
+              onShowDownload={() => setView('download')}
             />
             
             <main className="mt-12">
@@ -225,18 +224,6 @@ function App() {
             onClose={() => setSearchResults([])}
         />
       )}
-      {isDownloadPromptVisible && (
-        <DownloadPromptModal
-            onConfirm={handleInstallClick}
-            onClose={() => setIsDownloadPromptVisible(false)}
-        />
-      )}
-      {view === 'checker' && (
-        <InstallButton 
-            isVisible={!!installPrompt}
-            onClick={() => setIsDownloadPromptVisible(true)}
-        />
-       )}
     </div>
   );
 }

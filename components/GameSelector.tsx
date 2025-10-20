@@ -55,12 +55,18 @@ export const GameSelector: React.FC<GameSelectorProps> = ({ games, selectedGame,
               selectedGame?.id === game.id ? 'border-cyan-400 scale-105 shadow-lg shadow-cyan-500/20' : 'border-gray-700 hover:border-cyan-600 hover:-translate-y-1'
             }`}
           >
-            <img 
-              src={game.posterUrl} 
-              alt={game.name} 
-              className="w-full aspect-video object-cover bg-gray-700 transition-transform duration-300 group-hover:scale-105" 
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PLACEHOLDER_IMAGE; }}
-            />
+            {game.posterUrl && game.posterUrl !== 'NO_IMAGE' ? (
+              <img 
+                src={game.posterUrl} 
+                alt={game.name} 
+                className="w-full aspect-video object-cover bg-gray-700 transition-transform duration-300 group-hover:scale-105" 
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PLACEHOLDER_IMAGE; }}
+              />
+            ) : (
+              <div className="w-full aspect-video bg-gray-700 flex items-center justify-center p-4">
+                <span className="text-center text-gray-400 font-semibold">{game.name}</span>
+              </div>
+            )}
             <div className="p-3 bg-gray-800">
               <h4 className="font-semibold truncate text-sm">{game.name}</h4>
             </div>
