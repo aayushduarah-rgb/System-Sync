@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 
 interface LoginPageProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (username: string) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         // Mock login: any non-empty credentials will work
-        if (username.trim() && password.trim()) {
-            onLoginSuccess();
+        if (username.trim() && password.trim() && email.trim()) {
+            onLoginSuccess(username);
         }
     };
 
@@ -21,10 +22,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <div className="w-full max-w-md">
                 <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm rounded-lg p-8 border border-gray-700 shadow-lg shadow-cyan-500/10">
                     <div className="text-center mb-6">
-                        <h1 className="text-3xl font-bold text-cyan-400 mb-2">Login Required</h1>
-                        <p className="text-gray-400">You've used all your free checks. Please login to continue.</p>
+                        <h1 className="text-3xl font-bold text-cyan-400 mb-2">Login or Sign Up</h1>
+                        <p className="text-gray-400 font-sans">You've used your free checks. Please login to continue.</p>
                     </div>
-                    <form onSubmit={handleLogin} className="space-y-4">
+                    <form onSubmit={handleLogin} className="space-y-4 font-sans">
                         <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-400 mb-1">Username</label>
                             <input
@@ -33,7 +34,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-cyan-500 focus:border-cyan-500 transition"
-                                placeholder="any_username"
+                                placeholder="e.g., gamer123"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-cyan-500 focus:border-cyan-500 transition"
+                                placeholder="user@example.com"
                                 required
                             />
                         </div>

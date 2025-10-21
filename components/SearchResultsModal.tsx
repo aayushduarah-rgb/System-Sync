@@ -1,9 +1,10 @@
 import React from 'react';
-import type { Game } from '../types';
+// FIX: Changed type from 'Game' to 'Software' to match the definition in `types.ts`.
+import type { Software } from '../types';
 
 interface SearchResultsModalProps {
-  results: Game[];
-  onSelect: (game: Game) => void;
+  results: Software[];
+  onSelect: (software: Software) => void;
   onClose: () => void;
 }
 
@@ -16,15 +17,15 @@ export const SearchResultsModal: React.FC<SearchResultsModalProps> = ({ results,
       >
         <div className="p-6">
           <h2 className="text-xl font-bold text-white mb-2">Did you mean...</h2>
-          <p className="text-gray-400 mb-4">Your search returned multiple results. Please select the correct game.</p>
+          <p className="text-gray-400 mb-4">Your search returned multiple results. Please select the correct software.</p>
           <div className="max-h-80 overflow-y-auto space-y-2">
-            {results.map((game) => (
+            {results.map((software) => (
               <button
-                key={game.id}
-                onClick={() => onSelect(game)}
+                key={software.id}
+                onClick={() => onSelect(software)}
                 className="w-full text-left p-3 bg-gray-800 hover:bg-cyan-900/50 rounded-md transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
-                {game.name}
+                {software.name}
               </button>
             ))}
           </div>

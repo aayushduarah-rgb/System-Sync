@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import type { Plan } from '../App';
 
 interface PaymentPageProps {
   onPaymentSuccess: () => void;
   onBack: () => void;
+  plan: Plan;
 }
 
-export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onBack }) => {
+export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onBack, plan }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
+  
+  const price = plan === 'monthly' ? 199 : 999;
 
   const handlePayment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +34,7 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onBa
             <div className="bg-gray-900 bg-opacity-80 backdrop-blur-sm rounded-lg p-8 border border-gray-700 shadow-lg shadow-cyan-500/10">
                 <div className="text-center mb-6">
                     <h1 className="text-2xl font-bold text-cyan-400 mb-2">Secure Payment</h1>
-                    <p className="text-gray-400">Complete your purchase for SystemSync Pro.</p>
+                    <p className="text-gray-400">Complete your purchase for SystemSync Pro ({plan}).</p>
                 </div>
 
                 <form onSubmit={handlePayment} className="space-y-4">
@@ -68,7 +72,7 @@ export const PaymentPage: React.FC<PaymentPageProps> = ({ onPaymentSuccess, onBa
                                 </svg>
                                 Processing...
                             </>
-                        ) : 'Pay ₹59 securely'}
+                        ) : `Pay ₹${price} securely`}
                     </button>
                 </form>
             </div>

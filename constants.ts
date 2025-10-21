@@ -1,6 +1,6 @@
-import type { Game } from './types';
+import type { Software } from './types';
 
-export const GAMES: Game[] = [
+export const SOFTWARE: Software[] = [
   {
     id: 'cyberpunk2077',
     name: 'Cyberpunk 2077',
@@ -9,11 +9,11 @@ export const GAMES: Game[] = [
     recReqs: { cpu: 'Intel Core i7-12700 or AMD Ryzen 7 7800X3D', gpu: 'Nvidia GeForce RTX 3080 or AMD Radeon RX 6800 XT', ram: '16 GB', os: 'Windows 11 64-bit' }
   },
   {
-    id: 'stardew_valley',
-    name: 'Stardew Valley',
-    posterUrl: 'https://upload.wikimedia.org/wikipedia/en/5/52/Stardew_Valley_box_art.png',
-    minReqs: { cpu: '2 Ghz', gpu: '256 mb video memory, shader model 3.0+', ram: '2 GB', os: 'Windows Vista or greater' },
-    recReqs: { cpu: '2.4 Ghz or better', gpu: '512 mb video memory, shader model 3.0+', ram: '4 GB', os: 'Windows 10/11' }
+    id: 'adobe-photoshop-2024',
+    name: 'Adobe Photoshop 2024',
+    posterUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Adobe_Photoshop_CC_icon.svg/1200px-Adobe_Photoshop_CC_icon.svg.png',
+    minReqs: { cpu: 'Intel or AMD processor with 64-bit support; 2 GHz or faster processor with SSE 4.2 or later', gpu: 'GPU with DirectX 12 support, 1.5 GB of GPU memory', ram: '8 GB', os: 'Windows 10 64-bit (version 22H2) or later' },
+    recReqs: { cpu: 'Intel or AMD processor with 64-bit support; 2 GHz or faster processor with SSE 4.2 or later', gpu: 'GPU with DirectX 12 support, 4 GB of GPU memory for 4K displays and greater', ram: '16 GB or more', os: 'Windows 11' }
   },
   {
     id: 'elden_ring',

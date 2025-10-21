@@ -5,7 +5,7 @@ export interface SystemSpecs {
   os: string;
 }
 
-export interface Game {
+export interface Software {
   id: string;
   name:string;
   posterUrl: string;
@@ -21,7 +21,7 @@ export interface ComponentCheck {
 
 export interface CompatibilityReport {
   isCompatible: boolean;
-  estimatedFps: number;
+  estimatedPerformance: string;
   analysis: string;
   componentCheck: {
     cpu: ComponentCheck;

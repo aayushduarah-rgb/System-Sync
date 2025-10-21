@@ -13,12 +13,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
         </button>
         <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm rounded-lg p-8 border border-gray-700 shadow-lg shadow-cyan-500/10">
           <h1 className="text-3xl font-bold text-cyan-400 mb-4">About SystemSync</h1>
-          <p className="text-gray-300 leading-relaxed mb-6">
+          <p className="text-gray-300 leading-relaxed mb-6 font-sans">
             This application was created by <strong className="text-white">Aayush Duarah</strong>, a student of class 12, for a project. 
             The goal was to build a helpful tool for PC gamers and professionals to quickly check hardware compatibility for games and applications.
           </p>
-          <p className="text-gray-300 leading-relaxed">
-            Using the power of Google's Gemini API, SystemSync provides a detailed analysis, performance estimations, and a simulated gameplay experience to help users make informed decisions about their hardware or potential purchases.
+          <p className="text-gray-300 leading-relaxed font-sans">
+            Using the power of Google's Gemini API, SystemSync provides a detailed analysis and performance estimations to help users make informed decisions about their hardware or potential software purchases.
           </p>
         </div>
       </div>

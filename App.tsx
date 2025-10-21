@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
-import { GameSelector } from './components/GameSelector';
+import { SoftwareSelector } from './components/GameSelector';
 import { SpecForm } from './components/SpecForm';
 import { ResultDisplay } from './components/ResultDisplay';
 import { LoginPage } from './components/LoginPage';
@@ -10,19 +10,22 @@ import { Loader } from './components/Loader';
 import { AboutPage } from './components/AboutPage';
 import { SearchResultsModal } from './components/SearchResultsModal';
 import { DownloadPage } from './components/DownloadPage';
+import { ProfilePage } from './components/ProfilePage';
 import { Footer } from './Footer';
-import type { Game, SystemSpecs, CompatibilityReport } from './types';
-import { getCompatibilityReport, searchForGame } from './services/geminiService';
-import { GAMES as initialGames } from './constants';
+import type { Software, SystemSpecs, CompatibilityReport } from './types';
+import { getCompatibilityReport, searchForSoftware } from './services/geminiService';
+import { SOFTWARE as initialSoftware } from './constants';
 
-const FREE_CHECKS_LIMIT = 5;
+const FREE_CHECKS_LIMIT = 10;
+const UNLIMITED_CHECKS = 9999;
 
-type View = 'checker' | 'login' | 'subscription' | 'about' | 'payment' | 'download';
+type View = 'checker' | 'login' | 'subscription' | 'about' | 'payment' | 'download' | 'profile';
+export type Plan = 'monthly' | 'yearly';
 
 function App() {
-  const [games, setGames] = useState<Game[]>(initialGames);
-  const [isGameSearched, setIsGameSearched] = useState<boolean>(false);
-  const [selectedGame, setSelectedGame] = useState<Game | null>(initialGames[0]);
+  const [softwareList, setSoftwareList] = useState<Software[]>(initialSoftware);
+  const [isSoftwareSearched, setIsSoftwareSearched] = useState<boolean>(false);
+  const [selectedSoftware, setSelectedSoftware] = useState<Software | null>(initialSoftware[0]);
   const [userSpecs, setUserSpecs] = useState<SystemSpecs | null>(null);
   const [compatibilityResult, setCompatibilityResult] = useState<CompatibilityReport | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -31,7 +34,9 @@ function App() {
   const [freeChecksLeft, setFreeChecksLeft] = useState<number>(FREE_CHECKS_LIMIT);
   const [view, setView] = useState<View>('checker');
   const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [searchResults, setSearchResults] = useState<Game[]>([]);
+  const [searchResults, setSearchResults] = useState<Software[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<Plan>('monthly');
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -40,7 +45,7 @@ function App() {
       if (storedChecks !== null) {
         const checks = JSON.parse(storedChecks);
         setFreeChecksLeft(checks);
-        if (checks <= 0) {
+        if (checks <= 0 && !currentUser) {
           setView('login');
         }
       } else {
@@ -57,7 +62,7 @@ function App() {
     };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+  }, [currentUser]);
 
   const handleInstallClick = () => {
     if (!installPrompt) return;
@@ -73,8 +78,8 @@ function App() {
   };
 
   const handleCheckCompatibility = useCallback(async (specs: SystemSpecs) => {
-    if (!selectedGame) {
-      setError("Please select a game first.");
+    if (!selectedSoftware) {
+      setError("Please select a software first.");
       return;
     }
 
@@ -89,14 +94,16 @@ function App() {
     setUserSpecs(specs);
 
     try {
-      const report = await getCompatibilityReport(selectedGame, specs);
+      const report = await getCompatibilityReport(selectedSoftware, specs);
       setCompatibilityResult(report);
       
-      const newChecksLeft = freeChecksLeft - 1;
-      setFreeChecksLeft(newChecksLeft);
-      localStorage.setItem('freeChecksLeft', JSON.stringify(newChecksLeft));
-      if (newChecksLeft <= 0) {
-        setTimeout(() => setView('login'), 5000); 
+      if (freeChecksLeft < UNLIMITED_CHECKS) {
+        const newChecksLeft = freeChecksLeft - 1;
+        setFreeChecksLeft(newChecksLeft);
+        localStorage.setItem('freeChecksLeft', JSON.stringify(newChecksLeft));
+        if (newChecksLeft <= 0) {
+          setTimeout(() => setView('login'), 5000); 
+        }
       }
     } catch (err) {
       console.error(err);
@@ -104,48 +111,58 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedGame, freeChecksLeft]);
+  }, [selectedSoftware, freeChecksLeft]);
   
-  const handleSearchGame = useCallback(async (query: string) => {
+  const handleSearchSoftware = useCallback(async (query: string) => {
     setIsSearching(true);
     setError(null);
     setCompatibilityResult(null);
     try {
-      const foundGames = await searchForGame(query);
-      if (foundGames && foundGames.length > 0) {
-        if (foundGames.length === 1) {
-          handleSelectFoundGame(foundGames[0]);
+      const foundSoftware = await searchForSoftware(query);
+      if (foundSoftware && foundSoftware.length > 0) {
+        if (foundSoftware.length === 1) {
+          handleSelectFoundSoftware(foundSoftware[0]);
         } else {
-          setSearchResults(foundGames);
+          setSearchResults(foundSoftware);
         }
       } else {
-        setError(`Could not find system requirements for "${query}". Please try another game.`);
+        setError(`Could not find system requirements for "${query}". Please try another title.`);
       }
     } catch (err) {
-        setError("The AI failed to find game details. Please try again.");
+        setError("The AI failed to find software details. Please try again.");
     } finally {
         setIsSearching(false);
     }
   }, []);
 
-  const handleSelectFoundGame = (game: Game) => {
-     setGames([game]);
-     setSelectedGame(game);
+  const handleSelectFoundSoftware = (software: Software) => {
+     setSoftwareList([software]);
+     setSelectedSoftware(software);
      setSearchResults([]);
-     setIsGameSearched(true);
+     setIsSoftwareSearched(true);
   };
 
   const handleClearSearch = () => {
-    setGames(initialGames);
-    setSelectedGame(initialGames[0]);
-    setIsGameSearched(false);
+    setSoftwareList(initialSoftware);
+    setSelectedSoftware(initialSoftware[0]);
+    setIsSoftwareSearched(false);
     setCompatibilityResult(null);
   }
 
-  const handleLoginSuccess = () => setView('subscription');
-  const handleProceedToPayment = () => setView('payment');
+  const handleLoginSuccess = (username: string) => {
+    setCurrentUser(username);
+    setView('profile');
+  };
+   const handleLogout = () => {
+    setCurrentUser(null);
+    setView('login');
+  };
+  const handleProceedToPayment = (plan: Plan) => {
+    setSelectedPlan(plan);
+    setView('payment');
+  };
   const handlePaymentSuccess = () => {
-    const newChecks = 50;
+    const newChecks = UNLIMITED_CHECKS;
     setFreeChecksLeft(newChecks);
     localStorage.setItem('freeChecksLeft', JSON.stringify(newChecks));
     setView('checker');
@@ -154,8 +171,9 @@ function App() {
   const renderContent = () => {
     switch(view) {
       case 'login': return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+      case 'profile': return <ProfilePage username={currentUser || 'User'} onContinue={() => setView('checker')} onLogout={handleLogout} />;
       case 'subscription': return <SubscriptionPage onProceedToPayment={handleProceedToPayment} onBack={() => setView('checker')} />;
-      case 'payment': return <PaymentPage onPaymentSuccess={handlePaymentSuccess} onBack={() => setView('subscription')} />;
+      case 'payment': return <PaymentPage onPaymentSuccess={handlePaymentSuccess} onBack={() => setView('subscription')} plan={selectedPlan} />;
       case 'about': return <AboutPage onBack={() => setView('checker')} />;
       case 'download': return <DownloadPage onBack={() => setView('checker')} onInstall={handleInstallClick} isInstallable={!!installPrompt} />;
       case 'checker':
@@ -167,22 +185,25 @@ function App() {
               onShowAbout={() => setView('about')}
               onShowSubscription={() => setView('subscription')}
               onShowDownload={() => setView('download')}
+              onGoHome={() => setView('checker')}
+              currentUser={currentUser}
+              onLogout={handleLogout}
             />
             
             <main className="mt-12">
               <section id="checker" className="mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold text-center mb-2 text-cyan-400">Is Your Rig Ready?</h2>
-                <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto">Select a game or search for any title, then enter your PC specs to see if you can run it. We'll even estimate your FPS and find a gameplay video.</p>
+                <h2 className="text-3xl md:text-4xl font-black text-center mb-2 text-cyan-400 tracking-wide">Is Your Rig Ready?</h2>
+                <p className="text-center text-gray-400 mb-8 max-w-2xl mx-auto font-sans">Select a game or app, then enter your PC specs to see if you can run it. We'll even estimate your performance.</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
                   <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm rounded-lg p-6 border border-gray-700">
-                    <GameSelector 
-                      games={games} 
-                      selectedGame={selectedGame} 
-                      onSelectGame={setSelectedGame}
-                      onSearchGame={handleSearchGame}
+                    <SoftwareSelector 
+                      softwareList={softwareList} 
+                      selectedSoftware={selectedSoftware} 
+                      onSelectSoftware={setSelectedSoftware}
+                      onSearchSoftware={handleSearchSoftware}
                       isSearching={isSearching}
-                      isGameSearched={isGameSearched}
+                      isSoftwareSearched={isSoftwareSearched}
                       onClearSearch={handleClearSearch}
                     />
                   </div>
@@ -194,13 +215,13 @@ function App() {
 
               {isLoading && <Loader />}
               
-              {error && <div className="text-center text-red-500 bg-red-900/50 p-4 rounded-md max-w-3xl mx-auto mb-8">{error}</div>}
+              {error && <div className="text-center text-red-500 bg-red-900/50 p-4 rounded-md max-w-3xl mx-auto mb-8 font-sans">{error}</div>}
 
-              {compatibilityResult && userSpecs && selectedGame && (
+              {compatibilityResult && userSpecs && selectedSoftware && (
                 <ResultDisplay 
                   result={compatibilityResult} 
                   userSpecs={userSpecs}
-                  game={selectedGame}
+                  software={selectedSoftware}
                 />
               )}
             </main>
@@ -211,16 +232,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-200 font-sans antialiased">
-      <div 
-        className="fixed top-0 left-0 w-full h-full bg-cover bg-center opacity-10" 
-        style={{backgroundImage: "url('https://images.pexels.com/photos/7130469/pexels-photo-7130469.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')"}}
-      ></div>
+    <div className="min-h-screen bg-black text-gray-200 antialiased bg-animated">
       {renderContent()}
       {searchResults.length > 0 && (
         <SearchResultsModal 
             results={searchResults}
-            onSelect={handleSelectFoundGame}
+            onSelect={handleSelectFoundSoftware}
             onClose={() => setSearchResults([])}
         />
       )}

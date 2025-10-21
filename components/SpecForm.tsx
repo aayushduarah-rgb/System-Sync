@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { SystemSpecs } from '../types';
+import { InfoIcon } from './IconComponents';
 
 interface SpecFormProps {
   onSubmit: (specs: SystemSpecs) => void;
@@ -8,10 +9,10 @@ interface SpecFormProps {
 
 export const SpecForm: React.FC<SpecFormProps> = ({ onSubmit, isLoading }) => {
   const [specs, setSpecs] = useState<SystemSpecs>({
-    cpu: 'Intel Core i5-9600K',
-    gpu: 'NVIDIA GeForce RTX 2070',
-    ram: '16 GB',
-    os: 'Windows 10 64-bit',
+    cpu: '',
+    gpu: '',
+    ram: '',
+    os: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,8 +26,14 @@ export const SpecForm: React.FC<SpecFormProps> = ({ onSubmit, isLoading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-xl font-semibold mb-4 text-white">2. Enter Your Specs</h3>
+    <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+      <h3 className="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+        2. Enter Your Specs
+        <div className="tooltip">
+          <InfoIcon className="w-5 h-5 text-gray-400" />
+          <span className="tooltip-text">For security reasons, browsers can't access your hardware details automatically. Please enter your PC specs manually for an accurate report.</span>
+        </div>
+      </h3>
       <div>
         <label htmlFor="cpu" className="block text-sm font-medium text-gray-400 mb-1">CPU</label>
         <input
@@ -75,7 +82,7 @@ export const SpecForm: React.FC<SpecFormProps> = ({ onSubmit, isLoading }) => {
           value={specs.os}
           onChange={handleChange}
           className="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-cyan-500 focus:border-cyan-500 transition"
-          placeholder="e.g., Windows 11"
+          placeholder="e.g., Windows 11 64-bit"
           required
         />
       </div>
